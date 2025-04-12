@@ -4,42 +4,48 @@ const fastify = Fastify({
   logger: true
 });
 
+const fruits = [];
+
 // Declare a route
-fastify.get('/', function (_, reply) {
-  reply.send({ hello: 'Krys' });
+fastify.get('/fruits', function (_, reply) {
+  reply.send({ fruits });
 });
 
 // JSON SCHEMA
 const schema = {
   body: {
     type: 'object',
-    required: ['someKey'],
+    required: ['fruit'],
     properties: {
-      someKey: { type: 'boolean' },
-      someOtherKey: { type: 'number' }
+      fruit: { type: 'string', minLength: 4 }
     }
   }
 };
 
 fastify.post(
-  // PATH
-  '/',
-  // options > Schema validator
+  '/fruit',
   {
-    schema,
-    preHandler: function (req, reply, done) {
-      console.log('Hello from pre-handler!', req.body.someKey);
-      done();
-    }
+    schema
   },
-  // Handler
   async function (req, reply) {
-    const { someKey } = req.body;
+    const { fruit } = req.body;
+    // TODO: prevent duplicated fruits
+    fruits.push(fruit);
+
     reply.send({
-      someKey
+      message: `the fruit ${fruit} was stored.`
     });
   }
 );
+
+/**
+ * create a new endpoint that verifies
+ * the existence of the fruit in the store
+ *
+ * /fruit/[banana/mango/pera]
+ *
+ * it returns a boolean value
+ */
 
 /**
  * Run the server!
